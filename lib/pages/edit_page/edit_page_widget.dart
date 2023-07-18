@@ -54,6 +54,10 @@ class _EditPageWidgetState extends State<EditPageWidget> {
     super.dispose();
   }
 
+  String toUpperCase(String text) {
+    return text.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -253,9 +257,10 @@ class _EditPageWidgetState extends State<EditPageWidget> {
                           onPressed: () async {
                             await widget.documento!
                                 .update(createUsersRecordData(
-                              email: _model.textFieldPracaEditController.text,
-                              displayName:
-                                  _model.textFieldNomeEditController.text,
+                              email: toUpperCase(
+                                  _model.textFieldPracaEditController.text),
+                              displayName: toUpperCase(
+                                  _model.textFieldNomeEditController.text),
                               uid: _model.dropDownEditValue,
                             ));
                             ScaffoldMessenger.of(context).showSnackBar(

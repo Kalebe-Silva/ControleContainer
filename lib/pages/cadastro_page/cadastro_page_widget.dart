@@ -41,6 +41,10 @@ class _CadastroPageWidgetState extends State<CadastroPageWidget> {
     super.dispose();
   }
 
+  String toUpperCase(String text) {
+    return text.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -247,9 +251,10 @@ class _CadastroPageWidgetState extends State<CadastroPageWidget> {
                             await UsersRecord.collection
                                 .doc()
                                 .set(createUsersRecordData(
-                                  displayName:
-                                      _model.textFieldContainerController.text,
-                                  email: _model.textFieldPracaController.text,
+                                  displayName: toUpperCase(
+                                      _model.textFieldContainerController.text),
+                                  email: toUpperCase(
+                                      _model.textFieldPracaController.text),
                                   uid: _model.dropDownInsertValue,
                                 ));
                             ScaffoldMessenger.of(context).showSnackBar(
