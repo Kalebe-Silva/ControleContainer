@@ -7,7 +7,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:text_search/text_search.dart';
 import 'cliente_page_model.dart';
@@ -166,9 +165,9 @@ class _ClientePageWidgetState extends State<ClientePageWidget> {
                                                 .map(
                                                   (record) => TextSearchItem(
                                                       record, [
-                                                    record.email!,
-                                                    record.displayName!,
-                                                    record.uid!
+                                                    record.email,
+                                                    record.displayName,
+                                                    record.uid
                                                   ]),
                                                 )
                                                 .toList(),
@@ -177,7 +176,6 @@ class _ClientePageWidgetState extends State<ClientePageWidget> {
                                                   _model.textController.text)
                                               .map((r) => r.object)
                                               .toList();
-                                          ;
                                         });
                                         setState(() {
                                           FFAppState().Pesquisa = true;
