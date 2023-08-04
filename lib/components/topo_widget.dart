@@ -1,16 +1,15 @@
-import 'package:controle_container/flutter_flow/flutter_flow_icon_button.dart';
-import 'package:controle_container/flutter_flow/flutter_flow_theme.dart';
-import 'package:controle_container/flutter_flow/flutter_flow_util.dart';
-import 'package:csv/csv.dart';
+import 'package:excel/excel.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 import 'dart:io';
 
-import '../app_state.dart';
-import '../flutter_flow/flutter_flow_model.dart';
+import '/flutter_flow/flutter_flow_icon_button.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import 'package:provider/provider.dart';
+
 import 'topo_model.dart';
 export 'topo_model.dart';
 
@@ -43,7 +42,7 @@ class _TopoWidgetState extends State<TopoWidget> {
     super.dispose();
   }
 
-  Future<void> exportFirestoreDataToCSV() async {
+  Future<void> exportFirestoreDataToExcel() async {
     try {
       // Inicializa o Firebase, se ainda não estiver inicializado
       await Firebase.initializeApp();
@@ -55,31 +54,62 @@ class _TopoWidgetState extends State<TopoWidget> {
       // Obter todos os documentos da coleção
       QuerySnapshot querySnapshot = await collectionRef.get();
 
-      // Defina os cabeçalhos das colunas no CSV
-      List<List<dynamic>> rows = [
-        ['display_name', 'email', 'uid'],
-      ]; // Adicione seus campos aqui
+      // Crie um arquivo Excel
+      var excel = Excel.createExcel();
+      var sheetObject = excel[excel.getDefaultSheet() ?? 'BASE DE DADOS'];
 
-      // Preencha os dados no CSV
-      List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (var doc in documents) {
-        rows.add([doc['display_name'], doc['email'], doc['uid']]);
+      // Defina os cabeçalhos das colunas no Excel
+      List<String> cells = ['A', 'B', 'C'];
+
+      // Defina os cabeçalhos das colunas no Excel
+      List<String> headers = [
+        'CONTAINER',
+        'PRAÇA',
+        'STATUS'
+      ]; // Adicione seus campos aqui
+      for (var i = 0; i < headers.length; i++) {
+        sheetObject.cell(CellIndex.indexByString('${cells[i]}1'))
+          ..value = headers[i]
+          ..cellStyle = CellStyle(backgroundColorHex: '#CCCCCC', bold: true);
       }
 
-      // Obtenha o diretório DCIM do dispositivo
-      Directory? dcimDirectory = await getExternalStorageDirectory();
-      String? dcimPath = dcimDirectory?.path;
+// Preencha os dados nos campos do Excel
+      List<QueryDocumentSnapshot> documents = querySnapshot.docs;
+      for (var i = 0; i < documents.length; i++) {
+        QueryDocumentSnapshot doc = documents[i];
+        try {
+          sheetObject.cell(CellIndex.indexByString('A${i + 2}'))
+            ..value = doc[
+                'display_name'] // Substitua 'display_name' pelo campo correto do Firestore
+            ..cellStyle = CellStyle(backgroundColorHex: '#FFFFFF');
+          sheetObject.cell(CellIndex.indexByString('B${i + 2}'))
+            ..value = doc[
+                'email'] // Substitua 'email' pelo campo correto do Firestore
+            ..cellStyle = CellStyle(backgroundColorHex: '#FFFFFF');
+          sheetObject.cell(CellIndex.indexByString('C${i + 2}'))
+            ..value =
+                doc['uid'] // Substitua 'uid' pelo campo correto do Firestore
+            ..cellStyle = CellStyle(backgroundColorHex: '#FFFFFF');
+        } catch (e, stackTrace) {
+          print('Erro no documento ${doc.id}: $e\n$stackTrace');
+        }
+      }
 
-      // Salve o arquivo CSV na pasta DCIM com um nome exclusivo
-      String csvFileName = 'exported_data.csv';
-      String csvFilePath = '$dcimPath/$csvFileName';
-      String csv = const ListToCsvConverter().convert(rows);
-      File(csvFilePath).writeAsStringSync(csv);
+      // Obtenha o diretório de documentos do dispositivo
+      // Obtenha o diretório de downloads do dispositivo
+      Directory? downloadsDirectory = await getExternalStorageDirectory();
+      String downloadsPath = downloadsDirectory!.path;
+
+      // Salve o arquivo Excel na pasta de downloads com um nome exclusivo
+      String excelFileName = 'base_de_dados_controle_container.xlsx';
+      String excelFilePath = '$downloadsPath/$excelFileName';
+      var excelBytes = excel.encode();
+      File(excelFilePath).writeAsBytesSync(excelBytes!);
 
       // Exibir uma mensagem de sucesso
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Dados exportados para $csvFileName na pasta DCIM'),
+          content: Text('Dados exportados, arquivo: $excelFileName'),
           duration: Duration(seconds: 3),
         ),
       );
@@ -190,7 +220,7 @@ class _TopoWidgetState extends State<TopoWidget> {
                           ) ??
                           false;
                       if (confirmDialogResponse) {
-                        await exportFirestoreDataToCSV();
+                        await exportFirestoreDataToExcel();
                       } else {
                         return;
                       }
